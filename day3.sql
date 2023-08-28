@@ -1,5 +1,6 @@
 with 
-base (b) as (
+base (b) as 
+(
     select '00100' from dual union all
 	select '11110' from dual union all
 	select '10110' from dual union all
@@ -13,11 +14,13 @@ base (b) as (
 	select '00010' from dual union all
 	select '01010' from dual
 ),
-breakup(
+breakup
+(
     lvl, 
     b,
     bb
-) as (
+) as 
+(
     select 1, b, substr(b, 1, 1) from base 
     union all
 	select 
@@ -29,7 +32,8 @@ breakup(
     where
     	lvl < length(b)
 ),
-count_bits as (
+count_bits as 
+(
     select 
     	lvl,
     	rank() over(order by lvl desc) as rank,
@@ -40,7 +44,8 @@ count_bits as (
     group by 
     	lvl
 ),
-gamma as (
+gamma as 
+(
     select 
     	sum(case greatest(ones, zeros) when ones then 1 else 0 end * power(2, rank-1)) as gamma
     from 
@@ -48,23 +53,27 @@ gamma as (
     order by 
     	lvl
 ),
-epsilon as (
+epsilon as 
+(
     select 
     	sum(case greatest(ones, zeros) when ones then 0 else 1 end * power(2, rank-1)) as epsilon
 	from
     	count_bits
 ),
-solution_1 as (
+solution_1 as 
+(
     select gamma * epsilon from gamma, epsilon
 ),
-oxygen(
+oxygen
+(
     lvl,
     ones,
     zeros,
     bits,
     next_ones, 
     next_zeros
-) as (
+) as 
+(
 	select 
     	1,
     	a.ones,
@@ -76,8 +85,7 @@ oxygen(
     	count_bits a, base b
     where 	
 		a.lvl = 1
-    and 
-    	substr(b.b, a.lvl, 1) = case greatest(a.ones, a.zeros) when a.ones then '1' else '0' end
+    	and substr(b.b, a.lvl, 1) = case greatest(a.ones, a.zeros) when a.ones then '1' else '0' end
     union all
     select 
 		lvl + 1,
@@ -90,8 +98,7 @@ oxygen(
     	oxygen
     where 
     	substr(bits, lvl + 1, 1) = case greatest(next_ones, next_zeros) when next_ones then '1' else '0' end
-    and 
-    	lvl < length(bits)
+    	and lvl < length(bits)
 ),
 co2 (
     lvl,
@@ -100,7 +107,8 @@ co2 (
     bits,
     next_ones, 
     next_zeros
-) as (
+) as 
+(
 	select 
     	1,
     	a.ones,
@@ -112,8 +120,7 @@ co2 (
     	count_bits a, base b
     where 	
 		a.lvl = 1
-    and 
-    	substr(b.b, a.lvl, 1) = case least(a.ones, a.zeros) when a.zeros then '0' else '1' end
+    	and substr(b.b, a.lvl, 1) = case least(a.ones, a.zeros) when a.zeros then '0' else '1' end
     union all
     select 
 		lvl + 1,
@@ -126,14 +133,15 @@ co2 (
     	co2
     where 
     	substr(bits, lvl + 1, 1) = case least(next_ones, next_zeros) when next_zeros then '0' else '1' end
-    and 
-    	lvl < length(bits)
+    	and lvl < length(bits)
 ),
-breakup_2 (
+breakup_2 
+(
     cata,
     power,
     b
-) as (
+) as 
+(
     select 
     	'oxygen', 
     	rank()over(order by level desc) - 1, 
