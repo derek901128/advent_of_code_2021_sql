@@ -1,5 +1,6 @@
 with 
-base(instructions) as (
+base(instructions) as 
+(
 	select 'forward 5' from dual union all
 	select 'down 5' from dual union all
 	select 'forward 8' from dual union all
@@ -7,19 +8,27 @@ base(instructions) as (
 	select 'down 8' from dual union all
 	select 'forward 2' from dual
 ),
-stage_1 as (
+stage_1 as 
+(
     select 
     	row_number() over(order by rownum) as row_no,
-    	substr(instructions, 1, length(instructions) - 2) as direction,
+    	substr
+		(
+			instructions, 
+			1, 
+			length(instructions) - 2
+		) as direction,
     	to_number(substr(instructions, -2)) as steps,
-    	sum(
+    	sum
+		(
     		case substr(instructions, 1, length(instructions) - 2) 
     			when 'forward' 
     			then to_number(substr(instructions, -2)) 
     			else 0 
     		end
     	) over() as hp,
-    	sum(
+    	sum
+		(
     		case substr(instructions, 1, length(instructions) - 2) 
     			when 'down' 
     			then to_number(substr(instructions, -2))
@@ -31,19 +40,27 @@ stage_1 as (
     from
     	base
 ),
-stage_2 as (
-        select 
+stage_2 as 
+(
+    select 
     	row_number() over(order by rownum) as row_no,
-    	substr(instructions, 1, length(instructions) - 2) as direction,
+    	substr
+		(
+			instructions, 
+			1, 
+			length(instructions) - 2
+		) as direction,
     	to_number(substr(instructions, -2)) as steps,
-    	sum(
+    	sum
+		(
     		case substr(instructions, 1, length(instructions) - 2) 
     			when 'forward' 
     			then to_number(substr(instructions, -2)) 
     			else 0 
     		end
     	) over(order by rownum rows between unbounded preceding and current row) as hp,
-    	sum(
+    	sum
+		(
     		case substr(instructions, 1, length(instructions) - 2) 
     			when 'down' 
     			then to_number(substr(instructions, -2))
@@ -55,10 +72,12 @@ stage_2 as (
     from
     	base
 ),
-solution_1 as (
+solution_1 as 
+(
 	select distinct hp * d as answer_1 from stage_1    
 ),
-solution_2 as (
+solution_2 as 
+(
     select 
     	row_no,
     	hp * sum(case direction when 'forward' then steps * aim else 0 end) over(order by row_no rows between unbounded preceding and current row) as answer_2
