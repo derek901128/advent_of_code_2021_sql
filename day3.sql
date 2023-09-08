@@ -1,7 +1,7 @@
 with 
 base (b) as 
 (
-    select '00100' from dual union all
+	select '00100' from dual union all
 	select '11110' from dual union all
 	select '10110' from dual union all
 	select '10111' from dual union all
@@ -16,17 +16,17 @@ base (b) as
 ),
 breakup
 (
-    lvl, 
-    b,
-    bb
+    lvl
+    , b
+    , bb
 ) as 
 (
     select 1, b, substr(b, 1, 1) from base 
     union all
 	select 
-		lvl + 1,
-    	b,
-    	substr(b, lvl+1, 1) 
+		lvl + 1
+    	, b
+    	, substr(b, lvl+1, 1) 
     from
     	breakup
     where
@@ -35,10 +35,10 @@ breakup
 count_bits as 
 (
     select 
-    	lvl,
-    	rank() over(order by lvl desc) as rank,
-    	sum(case bb when '1' then 1 else 0 end) as ones,
-    	sum(case bb when '1' then 0 else 1 end) as zeros
+    	lvl
+    	, rank() over(order by lvl desc) as rank
+    	, sum(case bb when '1' then 1 else 0 end) as ones
+    	, sum(case bb when '1' then 0 else 1 end) as zeros
     from
     	breakup
     group by 
@@ -66,21 +66,21 @@ solution_1 as
 ),
 oxygen
 (
-    lvl,
-    ones,
-    zeros,
-    bits,
-    next_ones, 
-    next_zeros
+    lvl
+    , ones
+    , zeros
+    , bits
+    , next_ones
+    , next_zeros
 ) as 
 (
 	select 
-    	1,
-    	a.ones,
-    	a.zeros,
-    	b.b,
-    	sum(regexp_count(substr(b.b, 1 + 1, 1), '1')) over(partition by a.lvl),
-    	sum(regexp_count(substr(b.b, 1 + 1, 1), '0')) over(partition by a.lvl)
+    	1
+    	, a.ones
+    	, a.zeros
+    	, b.b
+    	, sum(regexp_count(substr(b.b, 1 + 1, 1), '1')) over(partition by a.lvl)
+    	, sum(regexp_count(substr(b.b, 1 + 1, 1), '0')) over(partition by a.lvl)
     from
     	count_bits a, base b
     where 	
@@ -88,34 +88,35 @@ oxygen
     	and substr(b.b, a.lvl, 1) = case greatest(a.ones, a.zeros) when a.ones then '1' else '0' end
     union all
     select 
-		lvl + 1,
-    	next_ones, 
-    	next_zeros,
-    	bits,
-    	sum(regexp_count(substr(bits, lvl + 1 + 1, 1), '1')) over(partition by lvl),
-    	sum(regexp_count(substr(bits, lvl + 1 + 1, 1), '0')) over(partition by lvl)
+		lvl + 1
+    	, next_ones 
+    	, next_zeros
+    	, bits
+    	, sum(regexp_count(substr(bits, lvl + 1 + 1, 1), '1')) over(partition by lvl)
+    	, sum(regexp_count(substr(bits, lvl + 1 + 1, 1), '0')) over(partition by lvl)
     from
     	oxygen
     where 
     	substr(bits, lvl + 1, 1) = case greatest(next_ones, next_zeros) when next_ones then '1' else '0' end
     	and lvl < length(bits)
 ),
-co2 (
-    lvl,
-    ones,
-    zeros,
-    bits,
-    next_ones, 
-    next_zeros
+co2 
+(
+    lvl
+    , ones
+    , zeros
+    , bits
+    , next_ones
+    , next_zeros
 ) as 
 (
 	select 
-    	1,
-    	a.ones,
-    	a.zeros,
-    	b.b,
-    	sum(regexp_count(substr(b.b, 1 + 1, 1), '1')) over(partition by a.lvl),
-    	sum(regexp_count(substr(b.b, 1 + 1, 1), '0')) over(partition by a.lvl)
+    	1
+    	, a.ones
+    	, a.zeros
+    	, b.b
+    	, sum(regexp_count(substr(b.b, 1 + 1, 1), '1')) over(partition by a.lvl)
+    	, sum(regexp_count(substr(b.b, 1 + 1, 1), '0')) over(partition by a.lvl)
     from
     	count_bits a, base b
     where 	
@@ -123,12 +124,12 @@ co2 (
     	and substr(b.b, a.lvl, 1) = case least(a.ones, a.zeros) when a.zeros then '0' else '1' end
     union all
     select 
-		lvl + 1,
-    	next_ones, 
-    	next_zeros,
-    	bits,
-    	sum(regexp_count(substr(bits, lvl + 1 + 1, 1), '1')) over(partition by lvl),
-    	sum(regexp_count(substr(bits, lvl + 1 + 1, 1), '0')) over(partition by lvl)
+		lvl + 1
+    	, next_ones 
+    	, next_zeros
+    	, bits
+    	, sum(regexp_count(substr(bits, lvl + 1 + 1, 1), '1')) over(partition by lvl)
+    	, sum(regexp_count(substr(bits, lvl + 1 + 1, 1), '0')) over(partition by lvl)
     from
     	co2
     where 
@@ -137,15 +138,15 @@ co2 (
 ),
 breakup_2 
 (
-    cata,
-    power,
-    b
+    cata
+    , power
+    , b
 ) as 
 (
     select 
-    	'oxygen', 
-    	rank()over(order by level desc) - 1, 
-    	substr(bits, level, 1) 
+    	'oxygen'
+    	, rank()over(order by level desc) - 1
+    	, substr(bits, level, 1) 
     from 
     	( select * from oxygen where lvl = (select max(lvl) from oxygen)) 
     connect by 
@@ -153,8 +154,8 @@ breakup_2
     union all
     select 
     	'co2', 
-    	rank() over(order by level desc) - 1,
-    	substr(bits, level, 1) 
+    	, rank() over(order by level desc) - 1
+    	, substr(bits, level, 1) 
     from 
     	( select * from co2 where lvl = (select max(lvl) from co2)) 
     connect by 
