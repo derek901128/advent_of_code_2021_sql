@@ -15,35 +15,35 @@ base(d) as
 add_rn as 
 (
     select 
-    	row_number()over(order by rownum) as rn,
-    	d
+    	row_number()over(order by rownum) as rn
+    	, d
     from 
     	base
 ),
 add_rolling_sum as 
 (
     select 
-    	rn,
-    	d,
-    	sum(d) over(order by rn rows between 2 preceding and current row) as rolling_sum
+    	rn
+    	, d
+    	, sum(d) over(order by rn rows between 2 preceding and current row) as rolling_sum
     from
     	add_rn
 ),
 add_in_de as 
 (
     select 
-    	rn,
-    	d,
-    	case 
+    	rn
+    	, d
+    	, case 
 			when lag(d)over(order by rn) < d 
 			then 'increased' 
 			else 'decreased' 
-		end as solution_1,
-    	case 
+			end as solution_1
+    	, case 
 			when lag(rolling_sum) over(order by rn) < rolling_sum 
 			then 'increased' 
 			else 'decreased' 
-		end as solution_2
+			end as solution_2
     from
     	add_rolling_sum
     where 
